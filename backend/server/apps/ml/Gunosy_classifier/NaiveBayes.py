@@ -39,7 +39,7 @@ warnings.filterwarnings("ignore")
 class NaiveBayes:
     def __init__(self):
         path_to_artifacts = "../../research/"
-        self.model = joblib.load(path_to_artifacts + "nb_classifier.joblib")
+        self.model = joblib.load("nb_classifier.joblib")
         
     def get_news(self, link):
         title = []
@@ -93,7 +93,7 @@ class NaiveBayes:
 
         df["wakati_text"] = wakati_text_list
         
-        with open("../../research/News_dataset.pickle", "rb") as data:
+        with open("News_dataset.pickle", "rb") as data:
             df_train = pickle.load(data)
             df_train = df_train.reset_index(drop=True).drop(columns = ["News_length"])
 
