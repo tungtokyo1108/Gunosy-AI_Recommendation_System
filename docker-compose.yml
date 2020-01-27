@@ -3,7 +3,7 @@ version: '3.7'
 services: 
     web:
         build: ./backend/server
-        command: python manage.py runserver 0.0.0.0:8000
+        command: gunicorn server.wsgi:application --bind 0.0.0.0:8000
         volumes: 
             - ./backend/server/:/backend/server/
         ports: 
