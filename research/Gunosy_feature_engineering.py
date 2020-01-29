@@ -19,7 +19,8 @@ from collections import Counter, defaultdict
 import MeCab
 from gensim.models import word2vec
 from gensim.models import Doc2Vec
-
+from gensim.models.doc2vec import TaggedDocument
+from tqdm import tqdm, tqdm_pandas, tqdm_notebook
 
 with open("News_dataset.pickle", "rb") as data:
     df = pickle.load(data)
@@ -231,6 +232,37 @@ X = X.toarray()
 vectorizer = TfidfVectorizer(use_idf = True, token_pattern=u'(?u)\\b\\w+\\b')
 X = vectorizer.fit_transform(df.wakati_text.values)
 X = X.toarray()
+
+# Word2Vec 
+corpus = [doc.split() for doc in df.wakati_text.values]
+model_w2v = word2vec.Word2Vec(corpus, size=300, min_count=20, window=10)
+
+def get_doc_mean_vector(doc, model):
+    doc_vector = np.zeros(model.vector_size)
+    words = doc.split()
+    word_cnt = 0 
+    for word in words:
+        try:
+            word_vector = model.wv[word]
+            doc_vector += word_vector 
+            word_cnt += 1
+        except KeyError:
+            pass
+    doc_vector /= word_cnt 
+    return doc_vector
+
+X = np.zeros((len(df), model_w2v.wv.vector_size))
+
+for i, doc in tqdm_notebook(enumerate(df.wakati_text.values)):
+    X[i, :] = get_doc_mean_vector(doc, model_w2v)
+
+# Doc2Vec
+corpus = [TaggedDocument(doc.split(), [i]) for i, doc in enumerate(df.wakati_text.values)]
+model = Doc2Vec(vector_size=300)
+model.build_vocab(corpus)
+model.train(corpus, total_examples=model.corpus_count, epochs=model.epochs)
+
+X = np.array([model.infer_vector(doc.split()) for doc in df.wakati_text.values])
 
 y = df["Category"].apply(lambda x: 0 
                              if x == "エンタメ" else 1 
