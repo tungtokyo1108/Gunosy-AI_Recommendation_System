@@ -143,7 +143,7 @@ class NaiveBayes:
                               input_data.item(0,6), input_data.item(0,7)]}
                      
         data_pred = pd.DataFrame(data=data_pred)
-        data_pred = data_pred.sort_values(by=['prob'])
+        data_pred = data_pred.sort_values(by=['prob'], ascending=False).reset_index(drop=True)
             
         return {"Group_1st: " : data_pred.loc[0, 'label'],
                 "Probablity for Group_1st is: ": round(data_pred.loc[0, 'prob']*100,2),
@@ -165,7 +165,7 @@ class NaiveBayes:
 
 # Test 
 my_algo = NaiveBayes()
-input_links = "https://gunosy.com/articles/Rue0f"        
+input_links = "https://gunosy.com/articles/RNj4e"        
 my_algo.compute_prediction(input_links)
         
       
