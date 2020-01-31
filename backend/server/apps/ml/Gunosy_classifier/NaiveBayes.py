@@ -128,7 +128,7 @@ class NaiveBayes:
     
     def predict(self, X, y, X_pred):
         X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, random_state=42)
-        nb_classifier = MultinomialNB(alpha=0.01, class_prior=None, fit_prior=True)
+        nb_classifier = MultinomialNB(alpha=0.02, class_prior=None, fit_prior=True)
         nb_classifier.fit(X_train, y_train)
         y_pred = nb_classifier.predict(X_pred)
         y_pred_prob = nb_classifier.predict_proba(X_pred)
