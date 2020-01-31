@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-Created on Wed Jan 22 10:05:24 2020
 
 @author: tungutokyo
 """
@@ -24,8 +23,8 @@ from scipy import interp
 from sklearn.model_selection import train_test_split, cross_val_score
 from sklearn.metrics import accuracy_score
 from sklearn.model_selection import cross_validate
-from sklearn.naive_bayes import MultinomialNB
-from sklearn.model_selection import TimeSeriesSplit, GridSearchCV
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.model_selection import TimeSeriesSplit, GridSearchCV, RandomizedSearchCV
 from sklearn.metrics import confusion_matrix
 from sklearn.metrics import precision_score
 from sklearn.metrics import recall_score
@@ -36,11 +35,10 @@ from sklearn.metrics import roc_curve, auc
 import warnings
 warnings.filterwarnings("ignore")
 
-class NaiveBayes:
+class RandomForest:
     def __init__(self):
         path_to_artifacts = "../../research/"
-        self.model = joblib.load("nb_classifier.joblib")
-        
+
     def get_news(self, link):
         title = []
         thearticle = []
@@ -73,7 +71,7 @@ class NaiveBayes:
         news = news[cols]
     
         return news
-        
+
     def preprocessing(self, input_data):
         
         df = input_data.reset_index(drop=True)
@@ -125,16 +123,20 @@ class NaiveBayes:
                              if x == "IT・科学" else 7)
         
         return X, y, X_pred
-    
+
     def predict(self, X, y, X_pred):
         X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, random_state=42)
-        nb_classifier = MultinomialNB(alpha=0.02, class_prior=None, fit_prior=True)
-        nb_classifier.fit(X_train, y_train)
-        y_pred = nb_classifier.predict(X_pred)
-        y_pred_prob = nb_classifier.predict_proba(X_pred)
-        #y_pred_prob = pd.DataFrame(y_pred_prob, dtype=np.int)
+        rf_classifier = RandomForestClassifier(bootstrap=True, class_weight=None, criterion='gini',
+            max_depth=25, max_features='sqrt', max_leaf_nodes=None,
+            min_impurity_decrease=0.0, min_impurity_split=None,
+            min_samples_leaf=1, min_samples_split=2,
+            min_weight_fraction_leaf=0.0, n_estimators=250, n_jobs=None,
+            oob_score=False, random_state=42, verbose=0, warm_start=False)
+        rf_classifier.fit(X_train, y_train)
+        y_pred = rf_classifier.predict(X_pred)
+        y_pred_prob = rf_classifier.predict_proba(X_pred)
         return y_pred_prob
-    
+
     def postprocessing(self, input_data):
         
         data_pred = {'label': ['エンタメ', 'スポーツ', 'グルメ', '海外', 'おもしろ', '国内', 'IT・科学', 'コラム'],
@@ -150,7 +152,7 @@ class NaiveBayes:
                 "Group_2nd: ": data_pred.loc[1, 'label'],
                 "Probablity for Group_2nd is: ": round(data_pred.loc[1, 'prob']*100,2),
                 "status: ": "OK"}
-        
+
     def compute_prediction(self, input_links):
         try:
             input_data = self.get_news(input_links)
@@ -162,41 +164,7 @@ class NaiveBayes:
         
         return prediction 
 
-
-# Test 
-my_algo = NaiveBayes()
-input_links = "https://gunosy.com/articles/Rue0f"        
+# Test
+my_algo = RandomForest()
+input_links = "https://gunosy.com/articles/Rue0f"
 my_algo.compute_prediction(input_links)
-        
-      
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        

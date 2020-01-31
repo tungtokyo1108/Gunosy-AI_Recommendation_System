@@ -14,12 +14,12 @@ from apps.ml.Gunosy_classifier.NaiveBayes import NaiveBayes
 
 class MLTests(TestCase):
     def test_nb_algorithm(self):
-        input_data = "https://gunosy.com/articles/a4Nlf" 
+        input_data = "https://gunosy.com/articles/Rue0f" 
         my_algo = NaiveBayes()
         response = my_algo.compute_prediction(input_data)
         self.assertEqual('OK', response["status: "])
-        self.assertTrue("Group: " in response)
-        self.assertEqual('スポーツ', response["Group: "])
+        self.assertTrue("Group_1st: " in response)
+        self.assertEqual('エンタメ', response["Group_1st: "])
         
     def test_registry(self):
         registry = MLRegistry()
