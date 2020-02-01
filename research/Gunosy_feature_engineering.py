@@ -69,7 +69,7 @@ for row in range(0, nrows):
     wakati_text_list.append(get_wakati_text(text))
 
 df["wakati_text"] = wakati_text_list
-df.to_csv("data_train.csv", index=False)
+
 ###############################################################################
 ######################### NaiveBayes-algorithm ################################
 ###############################################################################
