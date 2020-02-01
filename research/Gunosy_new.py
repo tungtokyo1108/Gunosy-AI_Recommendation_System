@@ -117,13 +117,13 @@ news_column = pd.read_csv("News_column.csv")
 news_IT = pd.read_csv("News_IT.csv")
 news_gourmet = pd.read_csv("News_gourmet.csv")
 
-news_enter_sample = news_enter.sample(n = 200).reset_index(drop=True)
-news_sport_sample = news_sport.sample(n = 200).reset_index(drop=True)
-news_inter_sample = news_inter.sample(n = 200).reset_index(drop=True)
-news_domestic_sample = news_domestic.sample(n = 200).reset_index(drop=True)
-news_column_sample = news_column.sample(n = 200).reset_index(drop=True)
-news_IT_sample = news_IT.sample(n = 200).reset_index(drop=True)
-news_gourmet_sample = news_gourmet.sample(n = 200).reset_index(drop=True)
+news_enter_sample = news_enter.sample(n = 400).reset_index(drop=True)
+news_sport_sample = news_sport.sample(n = 400).reset_index(drop=True)
+news_inter_sample = news_inter.sample(n = 400).reset_index(drop=True)
+news_domestic_sample = news_domestic.sample(n = 400).reset_index(drop=True)
+news_column_sample = news_column.sample(n = 400).reset_index(drop=True)
+news_IT_sample = news_IT.sample(n = 400).reset_index(drop=True)
+news_gourmet_sample = news_gourmet.sample(n = 400).reset_index(drop=True)
 
 news = pd.concat([news_enter_sample, news_sport_sample, news_inter_sample, 
                   news_domestic_sample, news_oversea, news_column_sample, 

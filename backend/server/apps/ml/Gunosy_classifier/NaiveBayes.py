@@ -39,7 +39,6 @@ warnings.filterwarnings("ignore")
 class NaiveBayes:
     def __init__(self):
         path_to_artifacts = "../../research/"
-        self.model = joblib.load("nb_classifier.joblib")
         
     def get_news(self, link):
         title = []
