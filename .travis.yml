@@ -1,0 +1,8 @@
+language: python
+python:
+  - 3.6
+services:
+  - docker-compose
+install:
+  - docker-compose build
+  - docker-compose up
