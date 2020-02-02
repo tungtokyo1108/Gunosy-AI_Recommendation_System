@@ -9,4 +9,4 @@ install:
   - docker-compose up -d
 
 script:
-  - pytest /tests/test.py
+  - pytest /home/travis/build/tungtokyo1108/Gunosy-Data_Analysis/tests/test.py
