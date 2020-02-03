@@ -12,14 +12,14 @@ import requests
 
 def test_metadata():
 
-    model_endpoint = 'http://0.0.0.0:8000/api/v1/'
+    model_endpoint = 'http://localhost:8000/api/v1/'
 
     r = requests.get(url=model_endpoint)
     assert r.status_code == 200
 
     metadata = r.json()
-    assert metadata['endpoints'] == 'http://0.0.0.0:8000/api/v1/endpoints'
-    assert metadata['mlalgorithms'] == 'http://0.0.0.0:8000/api/v1/mlalgorithms'
-    assert metadata['mlalgorithmstatuses'] == 'http://0.0.0.0:8000/api/v1/mlalgorithmstatuses'
-    assert metadata['mlrequests'] == 'http://0.0.0.0:8000/api/v1/mlrequests'
+    assert metadata['endpoints'] == 'http://localhost:8000/api/v1/endpoints'
+    assert metadata['mlalgorithms'] == 'http://localhost:8000/api/v1/mlalgorithms'
+    assert metadata['mlalgorithmstatuses'] == 'http://localhost:8000/api/v1/mlalgorithmstatuses'
+    assert metadata['mlrequests'] == 'http://localhost:8000/api/v1/mlrequests'
     
