@@ -10,7 +10,11 @@ import pytest
 import requests
 
 
-def test_travis():
+def test_metadata():
 
-    print("Hello Travis")
+    model_endpoint = 'http://localhost:8000/api/v1/'
+
+    r = requests.get(url=model_endpoint)
+    assert r.status_code == 200
+
     
