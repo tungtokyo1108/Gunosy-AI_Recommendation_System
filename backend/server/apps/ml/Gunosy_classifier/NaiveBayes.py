@@ -145,9 +145,9 @@ class NaiveBayes:
         data_pred = data_pred.sort_values(by=['prob'], ascending=False).reset_index(drop=True)
             
         return {"Group_1st: " : data_pred.loc[0, 'label'],
-                "Probablity for Group_1st is: ": round(data_pred.loc[0, 'prob']*100,2),
+                "Probability for Group_1st is: ": round(data_pred.loc[0, 'prob']*100,2),
                 "Group_2nd: ": data_pred.loc[1, 'label'],
-                "Probablity for Group_2nd is: ": round(data_pred.loc[1, 'prob']*100,2),
+                "Probability for Group_2nd is: ": round(data_pred.loc[1, 'prob']*100,2),
                 "status: ": "OK"}
         
     def compute_prediction(self, input_links):

@@ -7,6 +7,10 @@
 * `docker` and `docker-compose`: The [Docker](https://docs.docker.com/install/) and [Docker-compose](https://docs.docker.com/compose/install/) command-line interface. Follow these installation instructions for your system.
 * The minimum recommended resources for this model is 16 GB Memory + 8 CPUs (Ubuntu). 
 
+## Research 
+
+Including the data collection, data pre-process, feature engineering, model training, model evaluation. In order to read the specific methods, please go to [here](https://github.com/tungtokyo1108/Gunosy-Data_Analysis/blob/master/research/README.md) 
+
 ## Run Locally
 
 1. [Build the Model](#1-build-the-model)
@@ -50,11 +54,13 @@ The API server automatically generates an page. Go to `http://0.0.0.0:8000/api/v
 
 ![Swagger Doc Screenshot](docs/API_Root.png)
 
-Get predictions from the API, please go to `http://0.0.0.0:8000/api/v1/Gunosy_classifier/prediction`. Providing the links of `https://gunosy.com/` into the "Content" box, click the "POST" button and wait a few seconds to take the result of prediction. You can see views like images beloew. 
+Get predictions from the API, please go to `http://0.0.0.0:8000/api/v1/Gunosy_classifier/prediction`. Providing the links of `https://gunosy.com/` into the "Content" box (please put link inside "" like image below), click the "POST" button and wait a few seconds to take the result of prediction. You can see views like images beloew. 
 
 ![Swagger Doc Screenshot](docs/Sport_news.png)
 
 ![Swagger Doc Screenshot](docs/Sport_predict.png)
+
+The results of predictions provide the two groups with the highest probability
 
 ### 4. Cleanup
 
