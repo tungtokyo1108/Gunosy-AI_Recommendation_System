@@ -9,4 +9,4 @@ install:
   - docker-compose up -d
 
 script:
-  - pytest /test/test.py
+  - pytest test/test.py
