@@ -2,11 +2,11 @@ language: python
 python:
   - 3.6
 services:
-  - docker-compose
+  - docker
 
 install:
   - docker-compose build
   - docker-compose up -d
 
 script:
-  - pytest /home/travis/build/tungtokyo1108/Gunosy-Data_Analysis/tests/test.py
+  - pytest /tests/test.py
