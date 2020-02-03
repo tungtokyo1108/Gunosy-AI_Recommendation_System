@@ -23,5 +23,3 @@ def test_metadata():
     assert metadata['mlalgorithmstatuses'] == 'http://0.0.0.0:8000/api/v1/mlalgorithmstatuses'
     assert metadata['mlrequests'] == 'http://0.0.0.0:8000/api/v1/mlrequests'
     
-if __name__ == '__main__':
-    pytest.main([__file__])
