@@ -5,11 +5,11 @@
 ## Pre-requisites:
 
 * `docker` and `docker-compose`: The [Docker](https://docs.docker.com/install/) and [Docker-compose](https://docs.docker.com/compose/install/) command-line interface. Follow these installation instructions for your system.
-* The minimum recommended resources for this model is 16 GB Memory + 8 CPUs (Ubuntu). 
+* The minimum recommended resources for this model is 16GB RAM + 8 CPUs (Ubuntu). 
 
 ## Research 
 
-Including the data collection, data pre-process, feature engineering, model training, model evaluation. In order to read the specific methods, please go to [here](https://github.com/tungtokyo1108/Gunosy-Data_Analysis/blob/master/research/README.md) 
+Including the data collection, data pre-processing, feature engineering, model training, model evaluation. In order to read the specific methods, please go to [here](https://github.com/tungtokyo1108/Gunosy-Data_Analysis/blob/master/research/README.md) 
 
 ## Run Locally
 
