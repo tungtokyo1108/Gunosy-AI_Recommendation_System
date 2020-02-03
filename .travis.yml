@@ -10,4 +10,4 @@ install:
   - pip install pytest requests flake8
 
 script:
-  - echo $DJANGO_SECRET_KEY
+  - docker-compose -p test run -p 8000 --rm web python manage.py test apps
