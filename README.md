@@ -48,11 +48,14 @@ $ sudo docker-compose up
 
 The API server automatically generates an page. Go to `http://0.0.0.0:8000/api/v1/` to load it. From there you can explore the API and also create test requests.
 
-
 ![Swagger Doc Screenshot](docs/API_Root.png)
 
-![Swagger Doc Screenshot](docs/List_Project.png)
+Get predictions from the API, please go to `http://0.0.0.0:8000/api/v1/Gunosy_classifier/prediction`. Providing the links of `https://gunosy.com/` into the "Content" box, click the "POST" button and wait a few seconds to take the result of prediction. You can see views like images beloew. 
 
-![Swagger Doc Screenshot](docs/List_Algorithm.png)
+![Swagger Doc Screenshot](docs/Sport_news.png)
 
-![Swagger Doc Screenshot](docs/List_Status_Algorithm.png)
+![Swagger Doc Screenshot](docs/Sport_predict.png)
+
+### 4. Cleanup
+
+To stop the Docker container, type `CTRL` + `C` in your terminal.
