@@ -34,12 +34,16 @@ For Gunosy's second requirement for the improvement of document classification p
 
 ### Naive Bayes
 
+![Swagger Doc Screenshot](docs/NB_evaluate.png)
+
 I use the common measurements (accuracy, precision, recall, confusion matrix) to evaluate the model. 
 - [Naive Bayes classifier](https://github.com/tungtokyo1108/Gunosy-Data_Analysis/blob/master/research/Gunosy_classifier.ipynb) achieves the high accuray `99.23%`
 - There are the lower precisions for group 5 (国内) and group 6 (IT・科学). In both of cases, model makes the wrong predictions two news into group, but the true results are the different groups. 
 - The recall of group 7 (コラム) is lowest (0.94). The model miss to predict 6 news into group 7. 
 
 ### Random Forest
+
+![Swagger Doc Screenshot](docs/RF_evaluate.png)
 
 To improve the accuracy, I try to apply the Random Forest
 - [Random Forest](https://github.com/tungtokyo1108/Gunosy-Data_Analysis/blob/master/research/Gunosy_classifier_RF.ipynb) achieves the perfect accuracy `100%`

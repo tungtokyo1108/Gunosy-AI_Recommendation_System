@@ -9,7 +9,8 @@
 
 ## Research 
 
-Including the data collection, data pre-processing, feature engineering, model training, model evaluation. In order to read the specific methods, please go to [here](https://github.com/tungtokyo1108/Gunosy-Data_Analysis/blob/master/research/README.md) 
+- Including the data collection, data pre-processing, feature engineering, model training, model evaluation. In order to read the specific methods, please go to [here](https://github.com/tungtokyo1108/Gunosy-Data_Analysis/blob/master/research/README.md) 
+- Solution for Gunosy's second requirement for the improvement of document classification performance. 
 
 ## Run Locally
 

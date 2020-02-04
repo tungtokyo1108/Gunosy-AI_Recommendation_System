@@ -126,12 +126,12 @@ class RandomForest:
 
     def predict(self, X, y, X_pred):
         X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, random_state=42)
-        rf_classifier = RandomForestClassifier(bootstrap=True, class_weight=None, criterion='gini',
-            max_depth=25, max_features='sqrt', max_leaf_nodes=None,
-            min_impurity_decrease=0.0, min_impurity_split=None,
-            min_samples_leaf=1, min_samples_split=2,
-            min_weight_fraction_leaf=0.0, n_estimators=250, n_jobs=None,
-            oob_score=False, random_state=42, verbose=0, warm_start=False)
+        rf_classifier = RandomForestClassifier(bootstrap=True, class_weight=None,
+                       criterion='gini', max_depth=75, max_features='sqrt',
+                       min_samples_leaf=2, min_samples_split=2,
+                       min_weight_fraction_leaf=0.0, n_estimators=150,
+                       n_jobs=-1, oob_score=False, random_state=42, verbose=0,
+                       warm_start=False)
         rf_classifier.fit(X_train, y_train)
         y_pred = rf_classifier.predict(X_pred)
         y_pred_prob = rf_classifier.predict_proba(X_pred)
@@ -145,12 +145,12 @@ class RandomForest:
                               input_data.item(0,6), input_data.item(0,7)]}
                      
         data_pred = pd.DataFrame(data=data_pred)
-        data_pred = data_pred.sort_values(by=['prob'])
+        data_pred = data_pred.sort_values(by=['prob'], ascending=False).reset_index(drop=True)
             
         return {"Group_1st: " : data_pred.loc[0, 'label'],
-                "Probablity for Group_1st is: ": round(data_pred.loc[0, 'prob']*100,2),
+                "Probability for Group_1st is: ": round(data_pred.loc[0, 'prob']*100,2),
                 "Group_2nd: ": data_pred.loc[1, 'label'],
-                "Probablity for Group_2nd is: ": round(data_pred.loc[1, 'prob']*100,2),
+                "Probability for Group_2nd is: ": round(data_pred.loc[1, 'prob']*100,2),
                 "status: ": "OK"}
 
     def compute_prediction(self, input_links):
@@ -166,5 +166,5 @@ class RandomForest:
 
 # Test
 my_algo = RandomForest()
-input_links = "https://gunosy.com/articles/Rue0f"
+input_links = "https://gunosy.com/articles/aLCMe"
 my_algo.compute_prediction(input_links)
