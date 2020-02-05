@@ -10,4 +10,5 @@ install:
   - pip install pytest requests flake8
 
 script:
+  - docker-compose run -p 8000 --rm web python Gunosy_data_generate.py
   - docker-compose -p test run -p 8000 --rm web python manage.py test apps
