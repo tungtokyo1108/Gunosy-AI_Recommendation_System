@@ -28,6 +28,10 @@ RUN rm -f /usr/bin/python3 && ln -s /usr/bin/python3.6 /usr/bin/python3
 RUN pip3 install --upgrade pip
 RUN pip3 install -r requirements.txt
 
+COPY ./Gunosy_data_generate.py /backend/server/Gunosy_data_generate.py
+
+COPY ./Gunosy_model_training.py /backend/server/Gunosy_model_training.py
+
 # COPY ./entrypoint.sh /backend/server/entrypoint.sh
 
 # COPY . /backend/server/

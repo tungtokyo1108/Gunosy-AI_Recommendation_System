@@ -49,11 +49,39 @@ To run:
 $ sudo docker-compose up
 ```
 
+For the first time, the training data is not available, you have to wait to generate the database. For next time, when the training data is available, the training model is started like images below. 
+
+![Swagger Doc Screenshot](docs/First_time_training.png)
+
+![Swagger Doc Screenshot](docs/Next_time_train.png)
+
+If you want to run separately data generating and model training, to run below: 
+
+```
+$ sudo docker-compose run -p 8000 --rm web python Gunosy_data_generate.py
+```
+
+```
+$ sudo docker-compose run -p 8000 --rm web python Gunosy_model_training.py
+```
+
+If you want to make the new data base, you can remove the `News_dataset.pickle` and run 
+
+```
+$ sudo docker-compose up
+```
+or 
+```
+$ sudo docker-compose run -p 8000 --rm web python Gunosy_data_generate.py
+```
+
 ### 3. Use the Model
 
 The API server automatically generates an page. Go to `http://0.0.0.0:8000/api/v1/` to load it. From there you can explore the API and also create test requests.
 
 ![Swagger Doc Screenshot](docs/API_Root.png)
+
+![Swagger Doc Screenshot](docs/List_Algorithm.png)
 
 Get predictions from the API, please go to `http://0.0.0.0:8000/api/v1/Gunosy_classifier/prediction`. Providing the links of `https://gunosy.com/` into the "Content" box (please put link inside "" like image below), click the "POST" button and wait a few seconds to take the result of prediction. You can see views like images beloew. 
 

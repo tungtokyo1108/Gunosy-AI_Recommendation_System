@@ -10,6 +10,8 @@
 
 [Gunosy_new.py](https://github.com/tungtokyo1108/Gunosy-Data_Analysis/blob/master/research/Gunosy_new.py) and [Gunosy_new notebook](https://github.com/tungtokyo1108/Gunosy-Data_Analysis/blob/master/research/Gunosy_new.ipynb) provides the method to collect data from `https://gunosy.com/`. The data in Gunosy web includes the 8 groups 「エンタメ」、「スポーツ」、「おもしろ」、「国内」、「海外」、「コラム」、「IT・科学」、「グルメ」and each of groups has some sub-groups. However the number of sub-groups among groups are not similar, 「スポーツ」 has the largest number with 1100 news but 「海外」 has only 400 news. Therefore, in order to avoid the imbalanced classification problems and limitation of my computer, the 400 news are sampled randomly for each of 8 groups. The "requests" and "bs4" packages are used to collect the data.  
 
+Please note that the data training to run model in Web app is smaller significantly than data training to improve the accuracy of model in reseach section. Because for one time collection, 「海外」 group has only 200 news, so the only 200 news are sampled randomly for each of 8 groups.
+
 ## 2. Data pre-processing 
 
 [Data pre-processing notebook](https://github.com/tungtokyo1108/Gunosy-Data_Analysis/blob/master/research/Gunosy_EDA.ipynb) 
@@ -34,7 +36,7 @@ For Gunosy's second requirement for the improvement of document classification p
 
 ### Naive Bayes
 
-![Swagger Doc Screenshot](docs/NB_evaluate.png)
+![Swagger Doc Screenshot](NB_evaluate.png)
 
 I use the common measurements (accuracy, precision, recall, confusion matrix) to evaluate the model. 
 - [Naive Bayes classifier](https://github.com/tungtokyo1108/Gunosy-Data_Analysis/blob/master/research/Gunosy_classifier.ipynb) achieves the high accuray `99.23%`
@@ -43,7 +45,7 @@ I use the common measurements (accuracy, precision, recall, confusion matrix) to
 
 ### Random Forest
 
-![Swagger Doc Screenshot](docs/RF_evaluate.png)
+![Swagger Doc Screenshot](RF_evaluate.png)
 
 To improve the accuracy, I try to apply the Random Forest
 - [Random Forest](https://github.com/tungtokyo1108/Gunosy-Data_Analysis/blob/master/research/Gunosy_classifier_RF.ipynb) achieves the perfect accuracy `100%`

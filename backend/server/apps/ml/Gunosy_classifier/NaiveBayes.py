@@ -127,13 +127,20 @@ class NaiveBayes:
     
     def predict(self, X, y, X_pred):
         X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, random_state=42)
+        #alphas = np.logspace(-2,0,50)
+        #tuned_parameters = [{"alpha": alphas}]
+        #n_folds = 10
+        #model = MultinomialNB()
+        #my_cv = TimeSeriesSplit(n_splits=n_folds).split(X_train)
+        #gsearch_cv = GridSearchCV(estimator=model, param_grid=tuned_parameters, cv=my_cv, scoring="f1_macro", n_jobs=-1)
+        #gsearch_cv.fit(X_train, y_train)
+        #nb_classifier = gsearch_cv.best_estimator_
         nb_classifier = MultinomialNB(alpha=0.01, class_prior=None, fit_prior=True)
         nb_classifier.fit(X_train, y_train)
         y_pred = nb_classifier.predict(X_pred)
         y_pred_prob = nb_classifier.predict_proba(X_pred)
-        #y_pred_prob = pd.DataFrame(y_pred_prob, dtype=np.int)
         return y_pred_prob
-    
+
     def postprocessing(self, input_data):
         
         data_pred = {'label': ['エンタメ', 'スポーツ', 'グルメ', '海外', 'おもしろ', '国内', 'IT・科学', 'コラム'],
@@ -145,9 +152,9 @@ class NaiveBayes:
         data_pred = data_pred.sort_values(by=['prob'], ascending=False).reset_index(drop=True)
             
         return {"Group_1st: " : data_pred.loc[0, 'label'],
-                "Probability for Group_1st is: ": round(data_pred.loc[0, 'prob']*100,2),
+                "Probablity for Group_1st is: ": round(data_pred.loc[0, 'prob']*100,2),
                 "Group_2nd: ": data_pred.loc[1, 'label'],
-                "Probability for Group_2nd is: ": round(data_pred.loc[1, 'prob']*100,2),
+                "Probablity for Group_2nd is: ": round(data_pred.loc[1, 'prob']*100,2),
                 "status: ": "OK"}
         
     def compute_prediction(self, input_links):
@@ -170,32 +177,4 @@ my_algo.compute_prediction(input_links)
       
         
         
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
+    
