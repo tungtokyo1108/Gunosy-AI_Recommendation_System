@@ -5,7 +5,7 @@
 ## Pre-requisites:
 
 * `docker` and `docker-compose`: The [Docker](https://docs.docker.com/install/) and [Docker-compose](https://docs.docker.com/compose/install/) command-line interface. Follow these installation instructions for your system.
-* The recommended resources for this model is 32GB RAM + 8 CPUs (Ubuntu 18.04.4 LTS or macOS Mojave version 10.14.6). 
+* The recommended resources for this model is `32GB RAM + 8 CPUs` (Ubuntu 18.04.4 LTS or macOS Mojave version 10.14.6). 
 
 ## Research 
 
@@ -49,7 +49,7 @@ In order to データの収集 -> モデルのトレーニング -> ウェブア
 $ sudo docker-compose up
 ```
 
-For the first time, the training data is not available, you have to wait about one hour (60 min) to collect all availabel database in `https://gunosy.com/` (1600 news/time). For next time, when the training data is available, the training model is started like images below. 
+For the first time, the training data is not available, you have to wait about `one hour (60 min)` (under my current network) to collect all availabel database in `https://gunosy.com/` (1600 news/time). For next time, when the training data is available, the training model is started like images below. 
 
 ![Swagger Doc Screenshot](docs/First_time_training.png)
 
@@ -64,7 +64,7 @@ $ sudo docker-compose run -p 8000 --rm web python Gunosy_data_generate.py
 ```
 $ sudo docker-compose run -p 8000 --rm web python Gunosy_model_training.py
 ```
-
+#### Note
 In order to save time and test immediately the model training and Web app, I save the data training (which was collected on Thu Feb 6 2020). If you want to make the new data base, please remove the `News_dataset.pickle` in `backend/server` folder and run 
 
 ```
