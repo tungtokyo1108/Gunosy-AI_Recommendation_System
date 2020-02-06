@@ -104,6 +104,14 @@ def evaluate_multiclass(best_clf, X_train, y_train, X_test, y_test,
     
     print("\nClassification report for {} model: \n".format(model))
     print(metrics.classification_report(y_test, y_pred))
+
+    cnf_matrix = metrics.confusion_matrix(y_test, y_pred)
+    cnf_matrix_norm = cnf_matrix.astype('float') / cnf_matrix.sum(axis=1)[:, np.newaxis]
+    print("\nThe Confusion Matrix: \n")
+    print(cnf_matrix)
+    print("\n")
+    print("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~")
+    print("\n")
     
     return y_pred, y_pred_prob
 

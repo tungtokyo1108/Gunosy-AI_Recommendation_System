@@ -127,4 +127,4 @@ else:
     with open("News_dataset.pickle", "wb") as output:
         pickle.dump(df_news_95, output)
 
-    print("The database is available to trainng model!")
+    print("The database is available to training model!")
