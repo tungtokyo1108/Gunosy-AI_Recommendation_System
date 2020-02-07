@@ -63,6 +63,92 @@ from sklearn.metrics import recall_score
 from sklearn.metrics import f1_score
 from sklearn import metrics
 from sklearn.metrics import roc_curve, auc
+from sklearn.preprocessing import LabelBinarizer
+from sklearn.utils.extmath import safe_sparse_dot
+from sklearn.utils.fixes import logsumexp
+import warnings
+warnings.filterwarnings("ignore")
+
+class NaiveBayes:
+    
+    def __init__(self, alpha=0.01):
+        self.alpha = alpha
+
+    def count(self, X, Y):
+        """Count and smooth feature occurrences.
+           feature_count_: the number of occurances of term in training documents from class
+           class_count_: the number of classes
+        """
+        self.feature_count_ += safe_sparse_dot(Y.T, X)
+        self.class_count_ += Y.sum(axis=0)
+
+    def update_feature_log_distribution(self, alpha):
+        """Apply smoothing to raw counts and recompute log probabilities
+            Equation 119: 
+            log P^(t|c) = log(T_ct + alpha) - log (sum(T_ct' + alpha))
+        """
+        smoothed_fc = self.feature_count_ + alpha
+        smoothed_cc = smoothed_fc.sum(axis=1)
+
+        self.feature_log_prob_ = (np.log(smoothed_fc) -
+                                  np.log(smoothed_cc.reshape(-1, 1)))
+
+    def joint_log_likelihood(self, X):
+        """Calculate the posterior log probability of the samples X
+            Equation 115:
+             log P^(c) + log P^(t|c)
+        """
+        return (safe_sparse_dot(X, self.feature_log_prob_.T) +
+                self.class_log_prior_)
+        
+    def update_class_log_distribution(self):
+        """ Equation 116:
+                log P^(c) = log(Nc) - log(N)
+            Nc: the number of documents in class c 
+            N: the total number of documents 
+        """
+        n_classes = len(self.classes_)
+        
+        with warnings.catch_warnings():
+            warnings.simplefilter("ignore", RuntimeWarning)
+            log_class_count = np.log(self.class_count_)
+
+        # empirical prior, with sample_weight taken into account
+        self.class_log_prior_ = (log_class_count -
+                                     np.log(self.class_count_.sum()))
+            
+    def starting_values(self, n_effective_classes, n_features):
+        self.class_count_ = np.zeros(n_effective_classes, dtype=np.float64)
+        self.feature_count_ = np.zeros((n_effective_classes, n_features),
+                                       dtype=np.float64)
+        
+    def estimate_predict(self, X, y, X_test):
+    
+        _, n_features = X.shape
+        self.n_features_ = n_features
+
+        labelbin = LabelBinarizer()
+        Y = labelbin.fit_transform(y)
+        self.classes_ = labelbin.classes_
+        if Y.shape[1] == 1:
+            Y = np.concatenate((1 - Y, Y), axis=1)
+
+        n_effective_classes = Y.shape[1]
+
+        self.starting_values(n_effective_classes, n_features)
+        self.count(X, Y)
+        alpha = 0.01
+        self.update_feature_log_distribution(alpha)
+        self.update_class_log_distribution()
+        # The maxium of posteriori (MAP)
+        jll = self.joint_log_likelihood(X_test)
+        log_prob_x = logsumexp(jll, axis=1)
+        predict_log_prob = jll - np.atleast_2d(log_prob_x).T
+        predict_prob = np.exp(predict_log_prob)
+
+        predict = self.classes_[np.argmax(jll, axis=1)]
+        
+        return predict, predict_prob
 
 def get_GridSearchCV_estimator(model, X_train, y_train, X_test, y_test):
     
@@ -78,16 +164,19 @@ def get_GridSearchCV_estimator(model, X_train, y_train, X_test, y_test):
     print("Best Score: ", gsearch_cv.best_score_)
     return gsearch_cv
 
-def evaluate_multiclass(best_clf, X_train, y_train, X_test, y_test, 
+def evaluate_multiclass(X_train, y_train, X_test, y_test, 
                         model="Random Forest", num_class=3):
     print("-"*100)
     print("~~~~~~~~~~~~~~~~~~ PERFORMANCE EVALUATION ~~~~~~~~~~~~~~~~~~~~~~~~")
     print("Detailed report for the {} algorithm".format(model))
     
-    best_clf.fit(X_train, y_train)
-    y_pred = best_clf.predict(X_test)
-    y_pred_prob = best_clf.predict_proba(X_test)
-    
+    #best_clf.fit(X_train, y_train)
+    #y_pred = best_clf.predict(X_test)
+    #y_pred_prob = best_clf.predict_proba(X_test)
+
+    nb = NaiveBayes()
+    y_pred, y_pred_prob = nb.estimate_predict(X_train, y_train, X_test)
+
     test_accuracy = accuracy_score(y_test, y_pred, normalize=True) * 100
     points = accuracy_score(y_test, y_pred, normalize=False)
     print("The number of accurate predictions out of {} data points on unseen data is {}".format(
@@ -115,6 +204,8 @@ def evaluate_multiclass(best_clf, X_train, y_train, X_test, y_test,
     
     return y_pred, y_pred_prob
 
+
+
 ###############################################################################
 ##################### NaiveBayes-algorithm for IF-IDF #########################
 ###############################################################################
@@ -136,8 +227,8 @@ y = df["Category"].apply(lambda x: 0
 X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, random_state=42)
 
 print("\nStarting Cross Validation steps...")
-gsearch_cv = get_GridSearchCV_estimator("Naive Bayes", X_train, y_train, X_test, y_test)
-nb_classifier = gsearch_cv.best_estimator_
-nb_classifier.fit(X_train, y_train)
-y_pred, y_pred_prob = evaluate_multiclass(nb_classifier, X_train, y_train, X_test, y_test, 
+#gsearch_cv = get_GridSearchCV_estimator("Naive Bayes", X_train, y_train, X_test, y_test)
+#nb_classifier = gsearch_cv.best_estimator_
+#nb_classifier.fit(X_train, y_train)
+y_pred, y_pred_prob = evaluate_multiclass(X_train, y_train, X_test, y_test, 
                         model="Naive Bayes", num_class=8)

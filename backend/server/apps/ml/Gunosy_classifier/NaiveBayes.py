@@ -22,23 +22,17 @@ import itertools
 from scipy import interp
 
 from sklearn.model_selection import train_test_split, cross_val_score
-from sklearn.metrics import accuracy_score
-from sklearn.model_selection import cross_validate
-from sklearn.naive_bayes import MultinomialNB
-from sklearn.model_selection import TimeSeriesSplit, GridSearchCV
-from sklearn.metrics import confusion_matrix
-from sklearn.metrics import precision_score
-from sklearn.metrics import recall_score
-from sklearn.metrics import f1_score
-from sklearn import metrics
-from sklearn.metrics import roc_curve, auc
+from sklearn.preprocessing import LabelBinarizer
+from sklearn.utils.extmath import safe_sparse_dot
+from sklearn.utils.fixes import logsumexp
 
 import warnings
 warnings.filterwarnings("ignore")
 
 class NaiveBayes:
-    def __init__(self):
+    def __init__(self, alpha=0.01):
         path_to_artifacts = "../../research/"
+        self.alpha = alpha
         
     def get_news(self, link):
         title = []
@@ -125,21 +119,84 @@ class NaiveBayes:
         
         return X, y, X_pred
     
-    def predict(self, X, y, X_pred):
-        X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, random_state=42)
-        #alphas = np.logspace(-2,0,50)
-        #tuned_parameters = [{"alpha": alphas}]
-        #n_folds = 10
-        #model = MultinomialNB()
-        #my_cv = TimeSeriesSplit(n_splits=n_folds).split(X_train)
-        #gsearch_cv = GridSearchCV(estimator=model, param_grid=tuned_parameters, cv=my_cv, scoring="f1_macro", n_jobs=-1)
-        #gsearch_cv.fit(X_train, y_train)
-        #nb_classifier = gsearch_cv.best_estimator_
-        nb_classifier = MultinomialNB(alpha=0.01, class_prior=None, fit_prior=True)
-        nb_classifier.fit(X_train, y_train)
-        y_pred = nb_classifier.predict(X_pred)
-        y_pred_prob = nb_classifier.predict_proba(X_pred)
-        return y_pred_prob
+    """
+    Reference: 
+        https://nlp.stanford.edu/IR-book/html/htmledition/naive-bayes-text-classification-1.html
+    """
+    
+    def count(self, X, Y):
+        """Count and smooth feature occurrences.
+           feature_count_: the number of occurances of term in training documents from class
+           class_count_: the number of classes
+        """
+        self.feature_count_ += safe_sparse_dot(Y.T, X)
+        self.class_count_ += Y.sum(axis=0)
+
+    def update_feature_log_distribution(self, alpha):
+        """Apply smoothing to raw counts and recompute log probabilities
+            Equation 119: 
+            log P^(t|c) = log(T_ct + alpha) - log (sum(T_ct' + alpha))
+        """
+        smoothed_fc = self.feature_count_ + alpha
+        smoothed_cc = smoothed_fc.sum(axis=1)
+
+        self.feature_log_prob_ = (np.log(smoothed_fc) -
+                                  np.log(smoothed_cc.reshape(-1, 1)))
+
+    def joint_log_likelihood(self, X):
+        """Calculate the posterior log probability of the samples X
+            Equation 115:
+             log P^(c) + log P^(t|c)
+        """
+        return (safe_sparse_dot(X, self.feature_log_prob_.T) +
+                self.class_log_prior_)
+        
+    def update_class_log_distribution(self):
+        """ Equation 116:
+                log P^(c) = log(Nc) - log(N)
+            Nc: the number of documents in class c 
+            N: the total number of documents 
+        """
+        n_classes = len(self.classes_)
+        
+        with warnings.catch_warnings():
+            warnings.simplefilter("ignore", RuntimeWarning)
+            log_class_count = np.log(self.class_count_)
+
+        # empirical prior, with sample_weight taken into account
+        self.class_log_prior_ = (log_class_count -
+                                     np.log(self.class_count_.sum()))
+            
+    def starting_values(self, n_effective_classes, n_features):
+        self.class_count_ = np.zeros(n_effective_classes, dtype=np.float64)
+        self.feature_count_ = np.zeros((n_effective_classes, n_features),
+                                       dtype=np.float64)
+        
+    def estimate_predict(self, X, y, X_test):
+    
+        _, n_features = X.shape
+        self.n_features_ = n_features
+
+        labelbin = LabelBinarizer()
+        Y = labelbin.fit_transform(y)
+        self.classes_ = labelbin.classes_
+        if Y.shape[1] == 1:
+            Y = np.concatenate((1 - Y, Y), axis=1)
+
+        n_effective_classes = Y.shape[1]
+
+        self.starting_values(n_effective_classes, n_features)
+        self.count(X, Y)
+        alpha = 0.01
+        self.update_feature_log_distribution(alpha)
+        self.update_class_log_distribution()
+        # The maxium of posteriori (MAP)
+        jll = self.joint_log_likelihood(X_test)
+        log_prob_x = logsumexp(jll, axis=1)
+        predict_log_prob = jll - np.atleast_2d(log_prob_x).T
+        predict_prob = np.exp(predict_log_prob)
+        
+        return predict_prob
 
     def postprocessing(self, input_data):
         
@@ -161,7 +218,8 @@ class NaiveBayes:
         try:
             input_data = self.get_news(input_links)
             X, y, X_pred = self.preprocessing(input_data)
-            prediction = self.predict(X, y, X_pred)
+            X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, random_state=42)
+            prediction = self.estimate_predict(X_train, y_train, X_pred)
             prediction = self.postprocessing(prediction)
         except Exception as e:
             return {"status": "Error", "message": str(e)}
@@ -171,10 +229,6 @@ class NaiveBayes:
 
 # Test 
 my_algo = NaiveBayes()
-input_links = "https://gunosy.com/articles/RNj4e"        
+input_links = "https://gunosy.com/articles/RZQor"        
 my_algo.compute_prediction(input_links)
         
-      
-        
-        
-    

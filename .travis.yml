@@ -7,7 +7,7 @@ services:
 install:
   - docker-compose build
   - docker-compose up -d
-  - pip install pytest requests flake8
+  - pip install pytest requests
 
 script:
   - docker-compose -p test run -p 8000 --rm web python manage.py test apps
