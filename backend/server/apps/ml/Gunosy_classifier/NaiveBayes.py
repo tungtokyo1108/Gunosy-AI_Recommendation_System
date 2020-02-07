@@ -146,7 +146,7 @@ class NaiveBayes:
     def joint_log_likelihood(self, X):
         """Calculate the posterior log probability of the samples X
             Equation 115:
-             log P^(c) + log P^(t|c)
+             log P^(c) + sum(log P^(t|c))
         """
         return (safe_sparse_dot(X, self.feature_log_prob_.T) +
                 self.class_log_prior_)
@@ -188,10 +188,15 @@ class NaiveBayes:
         self.starting_values(n_effective_classes, n_features)
         self.count(X, Y)
         alpha = 0.01
+
+        # The maximum of posteriori (MAP)
+        
         self.update_feature_log_distribution(alpha)
         self.update_class_log_distribution()
-        # The maxium of posteriori (MAP)
         jll = self.joint_log_likelihood(X_test)
+
+        predict = self.classes_[np.argmax(jll, axis=1)]
+
         log_prob_x = logsumexp(jll, axis=1)
         predict_log_prob = jll - np.atleast_2d(log_prob_x).T
         predict_prob = np.exp(predict_log_prob)

@@ -57,6 +57,7 @@ from sklearn.metrics import accuracy_score
 from sklearn.model_selection import cross_validate
 from sklearn.naive_bayes import MultinomialNB
 from sklearn.model_selection import TimeSeriesSplit, GridSearchCV
+from sklearn.model_selection import StratifiedKFold
 from sklearn.metrics import confusion_matrix
 from sklearn.metrics import precision_score
 from sklearn.metrics import recall_score
@@ -204,7 +205,46 @@ def evaluate_multiclass(X_train, y_train, X_test, y_test,
     
     return y_pred, y_pred_prob
 
+def nb_cv_roc(X, y, num_cv = 5, random_state=None):
+    
+    X = pd.DataFrame(X)
+    y = pd.DataFrame(y)
+    
+    if isinstance(y, list):
+        y = np.asarray(y)
+    
+    alphas = np.logspace(-2,0,20)
+    
+    skf = StratifiedKFold(n_splits = 5, shuffle = True, random_state = 42)
+    
+    for alpha in alphas:
+        print("\nThe value of alpha: ", alpha)
+        nb = NaiveBayes(alpha = alpha)
+        test_accuracies = 0
+        test_precisions = 0
+        test_recalls = 0
+        test_f1s = 0
+        cv_count = 0
+        for train, test in skf.split(X,y):
+            y_pred, y_pred_pro = nb.estimate_predict(X.iloc[train], y.iloc[train], X.iloc[test])
+            test_accuracy = metrics.accuracy_score(y.iloc[test], y_pred, normalize = True) * 100
+            test_accuracies += test_accuracy
+            test_precision = metrics.precision_score(y.iloc[test], y_pred, average="macro")
+            test_precisions += test_precision
+            test_recall_score = metrics.recall_score(y.iloc[test], y_pred, average="macro")
+            test_recalls += test_recall_score
+            test_f1_score = metrics.f1_score(y.iloc[test], y_pred, average="macro")
+            test_f1s += test_f1_score
+            cv_count += 1
+        
+        test_accuracies /= cv_count
+        test_precisions /= cv_count
+        test_recalls /= cv_count
+        test_f1s /= cv_count
 
+        print ({i: j for i, j in 
+            zip(("Accuracy", "Precision_Score", "Recall_Score", "F1_Score"),
+                (test_accuracies, test_precisions, test_recalls, test_f1s))})
 
 ###############################################################################
 ##################### NaiveBayes-algorithm for IF-IDF #########################
@@ -224,11 +264,13 @@ y = df["Category"].apply(lambda x: 0
                              if x == "国内" else 6
                              if x == "IT・科学" else 7)
 
-X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, random_state=42)
+#X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, random_state=42)
 
 print("\nStarting Cross Validation steps...")
 #gsearch_cv = get_GridSearchCV_estimator("Naive Bayes", X_train, y_train, X_test, y_test)
 #nb_classifier = gsearch_cv.best_estimator_
 #nb_classifier.fit(X_train, y_train)
-y_pred, y_pred_prob = evaluate_multiclass(X_train, y_train, X_test, y_test, 
-                        model="Naive Bayes", num_class=8)
+#y_pred, y_pred_prob = evaluate_multiclass(X_train, y_train, X_test, y_test, 
+#                        model="Naive Bayes", num_class=8)
+
+nb_cv_roc(X, y, num_cv = 5)
