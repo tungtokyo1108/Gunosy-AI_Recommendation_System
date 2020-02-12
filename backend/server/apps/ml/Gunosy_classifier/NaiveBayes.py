@@ -118,8 +118,29 @@ class NaiveBayes:
                              if x == "IT・科学" else 7)
         
         return X, y, X_pred
+
+    def predict(self, X, y, X_pred):
+        """
+        This function was used in version before review. 
+        This function was used Naive Bayes and GridSearchCV from scikit-learn
+        """
+        X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, random_state=42)
+        #alphas = np.logspace(-2,0,50)
+        #tuned_parameters = [{"alpha": alphas}]
+        #n_folds = 10
+        #model = MultinomialNB()
+        #my_cv = TimeSeriesSplit(n_splits=n_folds).split(X_train)
+        #gsearch_cv = GridSearchCV(estimator=model, param_grid=tuned_parameters, cv=my_cv, scoring="f1_macro", n_jobs=-1)
+        #gsearch_cv.fit(X_train, y_train)
+        #nb_classifier = gsearch_cv.best_estimator_
+        nb_classifier = MultinomialNB(alpha=0.01, class_prior=None, fit_prior=True)
+        nb_classifier.fit(X_train, y_train)
+        y_pred = nb_classifier.predict(X_pred)
+        y_pred_prob = nb_classifier.predict_proba(X_pred)
+        return y_pred_prob
     
     """
+    In this current version, I have tried to run Naive Bayes based on some funtions below. 
     Reference: 
         https://nlp.stanford.edu/IR-book/html/htmledition/naive-bayes-text-classification-1.html
     """
