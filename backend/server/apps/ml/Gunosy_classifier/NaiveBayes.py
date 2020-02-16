@@ -26,10 +26,15 @@ from sklearn.preprocessing import LabelBinarizer
 from sklearn.utils.extmath import safe_sparse_dot
 from sklearn.utils.fixes import logsumexp
 
+from collections import defaultdict
+import re
+import collections
+
 import warnings
 warnings.filterwarnings("ignore")
 
 class NaiveBayes:
+    
     def __init__(self, alpha=0.01):
         path_to_artifacts = "../../research/"
         self.alpha = alpha
@@ -66,7 +71,7 @@ class NaiveBayes:
         news = news[cols]
     
         return news
-        
+    """ 
     def preprocessing(self, input_data):
         
         df = input_data.reset_index(drop=True)
@@ -99,7 +104,7 @@ class NaiveBayes:
 
         df_train["wakati_text"] = wakati_text_list
         
-        df = pd.concat([df, df_train]).reset_index(drop=True)
+        #df = pd.concat([df, df_train]).reset_index(drop=True)
         
         vectorizer = TfidfVectorizer(use_idf = True, token_pattern=u'(?u)\\b\\w+\\b')
         X = vectorizer.fit_transform(df.wakati_text.values)
@@ -117,27 +122,8 @@ class NaiveBayes:
                              if x == "国内" else 6
                              if x == "IT・科学" else 7)
         
-        return X, y, X_pred
-
-    def predict(self, X, y, X_pred):
-        """
-        This function was used in version before review. 
-        This function was used Naive Bayes and GridSearchCV from scikit-learn
-        """
-        X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, random_state=42)
-        #alphas = np.logspace(-2,0,50)
-        #tuned_parameters = [{"alpha": alphas}]
-        #n_folds = 10
-        #model = MultinomialNB()
-        #my_cv = TimeSeriesSplit(n_splits=n_folds).split(X_train)
-        #gsearch_cv = GridSearchCV(estimator=model, param_grid=tuned_parameters, cv=my_cv, scoring="f1_macro", n_jobs=-1)
-        #gsearch_cv.fit(X_train, y_train)
-        #nb_classifier = gsearch_cv.best_estimator_
-        nb_classifier = MultinomialNB(alpha=0.01, class_prior=None, fit_prior=True)
-        nb_classifier.fit(X_train, y_train)
-        y_pred = nb_classifier.predict(X_pred)
-        y_pred_prob = nb_classifier.predict_proba(X_pred)
-        return y_pred_prob
+        return df_train["Content_Parsed_1"], y, df["Content_Parsed_1"]
+    """
     
     """
     In this current version, I have tried to run Naive Bayes based on some funtions below. 
@@ -223,7 +209,105 @@ class NaiveBayes:
         predict_prob = np.exp(predict_log_prob)
         
         return predict_prob
+    
+    """
+    In this current version, I have tried to run Naive Bayes from scratch. 
+    Reference: 
+        https://github.com/joelgrus/data-science-from-scratch/blob/master/scratch/naive_bayes.py
+    """
+    
+    def preprocessing(self, input_data):
+        
+        df = input_data.reset_index(drop=True)
+        df["Content_Parsed_1"] = df["Article"].str.replace("キーワードで気になるニュースを絞りこもう 「いいね」、フォローをしておすすめの記事をチェックしよう。 グノシーについて 公式SNS 関連サイト アプリをダウンロード グノシー | 情報を世界中の人に最適に届ける Copyright © Gunosy Inc. All rights reserved.", '')
+        
+        with open("News_dataset.pickle", "rb") as data:
+            df_train = pickle.load(data)
+            df_train = df_train.reset_index(drop=True).drop(columns = ["News_length"])
 
+        df_train["Content_Parsed_1"] = df_train["Article"].str.replace("キーワードで気になるニュースを絞りこもう 「いいね」、フォローをしておすすめの記事をチェックしよう。 グノシーについて 公式SNS 関連サイト アプリをダウンロード グノシー | 情報を世界中の人に最適に届ける Copyright © Gunosy Inc. All rights reserved.", '')
+        
+        y = df_train["Category"].apply(lambda x: 0 
+                             if x == "エンタメ" else 1 
+                             if x == "スポーツ" else 2
+                             if x == "グルメ" else 3
+                             if x == "海外" else 4 
+                             if x == "おもしろ" else 5
+                             if x == "国内" else 6
+                             if x == "IT・科学" else 7)
+        
+        return df_train["Content_Parsed_1"], y, df["Content_Parsed_1"]
+    
+    def dict_words(self, example, dict_index):
+        for token_word in example:
+            self.bow_dicts[dict_index][token_word] += 1
+            
+    def tokenize(self, text):
+        tagger = MeCab.Tagger("-Owakati")
+        wakati_text = tagger.parse(text).strip().split()
+        return wakati_text
+    
+    def train(self, dataset, labels):
+        self.input_data = dataset
+        self.labels = labels
+        self.classese = np.unique(labels)
+        self.bow_dicts = np.array([defaultdict(lambda: 0) for index in range(self.classese.shape[0])])
+        
+        for cat_index, cat in enumerate(self.classese): 
+            all_cat_text = self.input_data[self.labels==cat]
+            cleaned_text = [self.tokenize(cat_example) for cat_example in all_cat_text]
+            cleaned_text = pd.DataFrame(data=cleaned_text)
+            np.apply_along_axis(self.dict_words, 1, cleaned_text, cat_index)
+        
+        prob_classes = np.empty(self.classese.shape[0])
+        all_words = []
+        cat_word_counts = np.empty(self.classese.shape[0])
+        for cat_index, cat in enumerate(self.classese):
+            prob_classes[cat_index] = np.sum(self.labels==cat)/float(self.labels.shape[0])
+            cat_word_counts[cat_index] = np.sum(np.array(list(self.bow_dicts[cat_index].values()))) + 1
+            all_words += self.bow_dicts[cat_index].keys()
+        
+        uniqueWords = collections.Counter()
+        for word in all_words:
+            uniqueWords[word] += 1
+        self.vocab = uniqueWords.keys()
+        self.vocab_length = len(self.vocab)
+        
+        denoms = np.array([cat_word_counts[cat_index] + self.vocab_length+1 for cat_index, cat in enumerate(self.classese)])
+        self.cats_info = [(self.bow_dicts[cat_index], prob_classes[cat_index], denoms[cat_index]) for cat_index, cat in enumerate(self.classese)]
+        self.cats_info = np.array(self.cats_info)
+        
+    
+    def joint_log_likelihood(self, test_example):
+        
+        likelihood_prob = np.zeros(self.classese.shape[0])
+        
+        for cat_index, cat in enumerate(self.classese):
+            for test_token in test_example:
+                test_token_counts = self.cats_info[cat_index][0].get(test_token, 0) + 1
+                test_token_prob = test_token_counts/float(self.cats_info[cat_index][2])
+                likelihood_prob[cat_index] += np.log(test_token_prob)
+                
+        post_prob = np.empty(self.classese.shape[0])
+        for cat_index, cat in enumerate(self.classese):
+            post_prob[cat_index] = likelihood_prob[cat_index] + np.log(self.cats_info[cat_index][1])
+            
+        return post_prob
+    
+    def predict(self, test_set):
+        predictions = []
+        predict_prob = []
+        for example in test_set:
+            cleaned_example = self.tokenize(example)
+            post_prob = self.joint_log_likelihood(cleaned_example)
+            predictions.append(self.classese[np.argmax(post_prob)])
+            
+            log_prob_x = logsumexp(post_prob)
+            predict_log_prob = post_prob - np.atleast_2d(log_prob_x).T
+            predict_prob.append(np.exp(predict_log_prob))
+        
+        return np.concatenate(predict_prob, axis=0)
+    
     def postprocessing(self, input_data):
         
         data_pred = {'label': ['エンタメ', 'スポーツ', 'グルメ', '海外', 'おもしろ', '国内', 'IT・科学', 'コラム'],
@@ -245,16 +329,48 @@ class NaiveBayes:
             input_data = self.get_news(input_links)
             X, y, X_pred = self.preprocessing(input_data)
             X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, random_state=42)
-            prediction = self.estimate_predict(X_train, y_train, X_pred)
+            self.train(X_train, y_train)
+            prediction = self.predict(X_pred)
+            #prediction = self.estimate_predict(X_train, y_train, X_pred)
             prediction = self.postprocessing(prediction)
         except Exception as e:
             return {"status": "Error", "message": str(e)}
         
-        return prediction 
+        return prediction
 
 
 # Test 
 my_algo = NaiveBayes()
-input_links = "https://gunosy.com/articles/RZQor"        
+input_links = "https://gunosy.com/articles/R5g7f"        
 my_algo.compute_prediction(input_links)
         
+input_data = my_algo.get_news(input_links)
+X, y, X_pred = my_algo.preprocessing(input_data)
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, random_state=42)
+prediction = my_algo.train(X_train, y_train)
+prediction = my_algo.predict(X_pred)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
