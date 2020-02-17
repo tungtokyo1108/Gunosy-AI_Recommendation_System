@@ -3,7 +3,7 @@ version: '3.7'
 services: 
     web:
         build: ./backend/server
-        command: bash -c "python Gunosy_data_generate.py && python Gunosy_model_training.py && python manage.py makemigrations && python manage.py migrate && python manage.py runserver 0.0.0.0:8000"
+        command: bash -c "python Gunosy_data_generate.py && python Gunosy_newest_news.py && python Gunosy_model_training.py && python manage.py makemigrations && python manage.py migrate && python manage.py runserver 0.0.0.0:8000"
         volumes: 
             - ./backend/server/:/backend/server/
         ports: 
