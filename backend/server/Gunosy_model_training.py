@@ -67,6 +67,10 @@ from sklearn.metrics import roc_curve, auc
 from sklearn.preprocessing import LabelBinarizer
 from sklearn.utils.extmath import safe_sparse_dot
 from sklearn.utils.fixes import logsumexp
+from collections import defaultdict
+import re
+import collections
+
 import warnings
 warnings.filterwarnings("ignore")
 
@@ -151,6 +155,76 @@ class NaiveBayes:
         
         return predict, predict_prob
 
+    def dict_words(self, example, dict_index):
+        for token_word in example:
+            self.bow_dicts[dict_index][token_word] += 1
+            
+    def tokenize(self, text):
+        tagger = MeCab.Tagger("-Owakati")
+        wakati_text = tagger.parse(text).strip().split()
+        return wakati_text
+    
+    def train(self, dataset, labels):
+        self.input_data = dataset
+        self.labels = labels
+        self.classese = np.unique(labels)
+        self.bow_dicts = np.array([defaultdict(lambda: 0) for index in range(self.classese.shape[0])])
+        
+        for cat_index, cat in enumerate(self.classese): 
+            all_cat_text = self.input_data[self.labels==cat]
+            cleaned_text = [self.tokenize(cat_example) for cat_example in all_cat_text]
+            cleaned_text = pd.DataFrame(data=cleaned_text)
+            np.apply_along_axis(self.dict_words, 1, cleaned_text, cat_index)
+        
+        prob_classes = np.empty(self.classese.shape[0])
+        all_words = []
+        cat_word_counts = np.empty(self.classese.shape[0])
+        for cat_index, cat in enumerate(self.classese):
+            prob_classes[cat_index] = np.sum(self.labels==cat)/float(self.labels.shape[0])
+            cat_word_counts[cat_index] = np.sum(np.array(list(self.bow_dicts[cat_index].values()))) + 1
+            all_words += self.bow_dicts[cat_index].keys()
+        
+        uniqueWords = collections.Counter()
+        for word in all_words:
+            uniqueWords[word] += 1
+        self.vocab = uniqueWords.keys()
+        self.vocab_length = len(self.vocab)
+        
+        denoms = np.array([cat_word_counts[cat_index] + self.vocab_length+1 for cat_index, cat in enumerate(self.classese)])
+        self.cats_info = [(self.bow_dicts[cat_index], prob_classes[cat_index], denoms[cat_index]) for cat_index, cat in enumerate(self.classese)]
+        self.cats_info = np.array(self.cats_info)
+        
+    
+    def joint_log_likelihood(self, test_example):
+        
+        likelihood_prob = np.zeros(self.classese.shape[0])
+        
+        for cat_index, cat in enumerate(self.classese):
+            for test_token in test_example:
+                test_token_counts = self.cats_info[cat_index][0].get(test_token, 0) + 1
+                test_token_prob = test_token_counts/float(self.cats_info[cat_index][2])
+                likelihood_prob[cat_index] += np.log(test_token_prob)
+                
+        post_prob = np.empty(self.classese.shape[0])
+        for cat_index, cat in enumerate(self.classese):
+            post_prob[cat_index] = likelihood_prob[cat_index] + np.log(self.cats_info[cat_index][1])
+            
+        return post_prob
+    
+    def predict(self, test_set):
+        predictions = []
+        predict_prob = []
+        for example in test_set:
+            cleaned_example = self.tokenize(example)
+            post_prob = self.joint_log_likelihood(cleaned_example)
+            predictions.append(self.classese[np.argmax(post_prob)])
+            
+            log_prob_x = logsumexp(post_prob)
+            predict_log_prob = post_prob - np.atleast_2d(log_prob_x).T
+            predict_prob.append(np.exp(predict_log_prob))
+        
+        return np.array(predictions), np.concatenate(predict_prob, axis=0)
+
 def get_GridSearchCV_estimator(model, X_train, y_train, X_test, y_test):
     
     alphas = np.logspace(-2,0,20)
@@ -176,7 +250,11 @@ def evaluate_multiclass(X_train, y_train, X_test, y_test,
     #y_pred_prob = best_clf.predict_proba(X_test)
 
     nb = NaiveBayes()
-    y_pred, y_pred_prob = nb.estimate_predict(X_train, y_train, X_test)
+    nb.train(X_train, y_train)
+    y_pred, y_pred_prob = nb.predict(X_test)
+
+    #nb = NaiveBayes()
+    #y_pred, y_pred_prob = nb.predict(X_test)
 
     test_accuracy = accuracy_score(y_test, y_pred, normalize=True) * 100
     points = accuracy_score(y_test, y_pred, normalize=False)
@@ -226,7 +304,8 @@ def nb_cv_roc(X, y, num_cv = 5, random_state=None):
         test_f1s = 0
         cv_count = 0
         for train, test in skf.split(X,y):
-            y_pred, y_pred_pro = nb.estimate_predict(X.iloc[train], y.iloc[train], X.iloc[test])
+            nb.train(X.iloc[train], y.iloc[train])
+            y_pred, y_pred_pro = nb.predict(X.iloc[test])
             test_accuracy = metrics.accuracy_score(y.iloc[test], y_pred, normalize = True) * 100
             test_accuracies += test_accuracy
             test_precision = metrics.precision_score(y.iloc[test], y_pred, average="macro")
@@ -264,13 +343,13 @@ y = df["Category"].apply(lambda x: 0
                              if x == "国内" else 6
                              if x == "IT・科学" else 7)
 
-#X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, random_state=42)
+X_train, X_test, y_train, y_test = train_test_split(df["Content_Parsed_1"], y, test_size=0.3, random_state=42)
 
 print("\nStarting Cross Validation steps...")
 #gsearch_cv = get_GridSearchCV_estimator("Naive Bayes", X_train, y_train, X_test, y_test)
 #nb_classifier = gsearch_cv.best_estimator_
-#nb_classifier.fit(X_train, y_train)
-#y_pred, y_pred_prob = evaluate_multiclass(X_train, y_train, X_test, y_test, 
-#                        model="Naive Bayes", num_class=8)
 
-nb_cv_roc(X, y, num_cv = 5)
+y_pred, y_pred_prob = evaluate_multiclass(X_train, y_train, X_test, y_test, 
+                        model="Naive Bayes", num_class=8)
+
+#nb_cv_roc(df["Content_Parsed_1"], y, num_cv = 5)
