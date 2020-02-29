@@ -1,6 +1,6 @@
 [![Build Status](https://travis-ci.com/tungtokyo1108/Gunosy-Data_Analysis.svg?token=yuqS1QiMpPCTMctfsjVi&branch=master)](https://travis-ci.com/tungtokyo1108/Gunosy-Data_Analysis)
 
-# Gunosy data analysis project: News classification 
+# Gunosy internship project: News Recommendation System 
 
 ## Pre-requisites:
 
@@ -86,9 +86,9 @@ The API server automatically generates an page. Go to `http://0.0.0.0:8000/api/v
 
 Get predictions from the API, please go to `http://0.0.0.0:8000/api/v1/Gunosy_classifier/prediction`. Providing the links of `https://gunosy.com/` into the "Content" box (please put link inside "" like image below), click the "POST" button and wait a few seconds to take the result of prediction. You can see views like images beloew. 
 
-![Swagger Doc Screenshot](docs/Sport_news.png)
+![Swagger Doc Screenshot](docs/Anime_news.png)
 
-![Swagger Doc Screenshot](docs/Sport_predict.png)
+![Swagger Doc Screenshot](docs/Anime_news_predict.png)
 
 The results of predictions provide the two groups with the highest probability
 
