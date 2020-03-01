@@ -1,4 +1,4 @@
-[![Build Status](https://travis-ci.com/tungtokyo1108/Gunosy-Data_Analysis.svg?token=yuqS1QiMpPCTMctfsjVi&branch=master)](https://travis-ci.com/tungtokyo1108/Gunosy-Data_Analysis)
+[![Build Status](https://travis-ci.com/tungtokyo1108/Gunosy-AI_Recommendation_System.svg?branch=master)](https://travis-ci.com/tungtokyo1108/Gunosy-AI_Recommendation_System)
 
 # Gunosy internship project: News Recommendation System 
 
